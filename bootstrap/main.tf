@@ -30,7 +30,7 @@ locals {
   prepare_network = [
     "sudo mkdir -p /quorum",
     "sudo chown -R ubuntu:ubuntu /quorum",
-    "/quorum/stop.sh || true",
+    "/quorum/stop.sh >/dev/null 2>&1 || true",
     "rm -rf /quorum/qdata",
     "rm -rf /quorum/start.sh /quorum/stop.sh",
   ]

@@ -53,7 +53,10 @@ resource "null_resource" "publish" {
   }
 
   provisioner "remote-exec" {
-    inline = ["${module.bootstrap.prepare_network}"]
+    inline = [
+      "while [ ! -f /tmp/signal ]; do echo 'Wait for ${element(module.cluster.dns, count.index)} being fully ready'; sleep 3; done",
+      "${module.bootstrap.prepare_network}"
+    ]
   }
 
   provisioner "file" {

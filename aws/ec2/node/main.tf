@@ -167,6 +167,8 @@ export TESSERA_JAR=${local.quorum_dir}/bin/tessera.jar
 F
 
 chown -R ubuntu:ubuntu ${local.quorum_dir}
+
+touch /tmp/signal
 EOF
 
   tags = {

@@ -34,7 +34,7 @@ module "bootstrap" {
 }
 
 module "us-east-1-nodes" {
-  source     = "quorum"
+  source     = "../ec2/node"
   output_dir = "${path.module}/target"
 
   providers = {
@@ -48,7 +48,7 @@ module "us-east-1-nodes" {
 }
 
 module "eu-west-1-nodes" {
-  source     = "quorum"
+  source     = "../ec2/node"
   output_dir = "${path.module}/target"
 
   providers = {
@@ -62,7 +62,7 @@ module "eu-west-1-nodes" {
 }
 
 module "ap-southeast-1-nodes" {
-  source     = "quorum"
+  source     = "../ec2/node"
   output_dir = "${path.module}/target"
 
   providers = {

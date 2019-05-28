@@ -6,9 +6,16 @@ variable "vpc_id" {}
 
 variable "output_dir" {}
 
-variable "ssh_public_key" {}
+variable "ssh_public_key" {
+  default = ""
+}
 
 variable "network_name" {}
+
+locals {
+  ssh_public_key = "${coalesce(var.ssh_public_key, join("", tls_private_key.ssh.*.public_key_openssh))}"
+  quorum_dir     = "/quorum"
+}
 
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -36,9 +43,21 @@ data "aws_ami" "ubuntu" {
   # Canonical
 }
 
+resource "tls_private_key" "ssh" {
+  count     = "${var.ssh_public_key == "" ? 1 : 0}"
+  algorithm = "RSA"
+  rsa_bits  = "2048"
+}
+
+resource "local_file" "private_key" {
+  count    = "${var.ssh_public_key == "" ? 1 : 0}"
+  filename = "${var.output_dir}/${var.network_name}.pem"
+  content  = "${tls_private_key.ssh.private_key_pem}"
+}
+
 resource "aws_key_pair" "ssh" {
-  public_key      = "${var.ssh_public_key}"
-  key_name_prefix = "${var.network_name}"
+  public_key      = "${local.ssh_public_key}"
+  key_name_prefix = "${var.network_name}-"
 }
 
 resource "aws_security_group" "quorum" {
@@ -128,22 +147,22 @@ resource "aws_instance" "node" {
 apt-get update
 apt-get -y install openjdk-8-jdk unzip
 
-mkdir -p /quorum/tm
-mkdir -p /quorum/qdata
-mkdir -p /quorum/bin
+mkdir -p ${local.quorum_dir}/tm
+mkdir -p ${local.quorum_dir}/qdata
+mkdir -p ${local.quorum_dir}/bin
 
-cd /quorum/bin
+cd ${local.quorum_dir}/bin
 wget "https://bintray.com/quorumengineering/quorum/download_file?file_path=v2.2.3%2Fgeth_v2.2.3_linux_amd64.tar.gz" -O geth.tar.gz
 tar xfvz geth.tar.gz
 rm geth.tar.gz
 wget "https://oss.sonatype.org/content/groups/public/com/jpmorgan/quorum/tessera-app/0.9/tessera-app-0.9-app.jar" -O tessera.jar
-java -jar tessera.jar -keygen -filename /quorum/tm/tm < /dev/null
+java -jar tessera.jar -keygen -filename ${local.quorum_dir}/tm/tm < /dev/null
 cat <<F > .profile
-export PATH=$${PATH}:/quorum/bin
-export TESSERA_JAR=/quorum/bin/tessera.jar
+export PATH=$${PATH}:${local.quorum_dir}/bin
+export TESSERA_JAR=${local.quorum_dir}/bin/tessera.jar
 F
 
-chown -R ubuntu:ubuntu /quorum
+chown -R ubuntu:ubuntu ${local.quorum_dir}
 EOF
 
   tags = {
@@ -162,4 +181,12 @@ output "ips" {
 
 output "dns" {
   value = "${aws_instance.node.*.public_dns}"
+}
+
+output "private_key" {
+  value = "${join("", tls_private_key.ssh.*.private_key_pem)}"
+}
+
+output "quorum_dir" {
+  value = "${local.quorum_dir}"
 }

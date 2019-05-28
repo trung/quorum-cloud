@@ -12,6 +12,10 @@ variable "ssh_public_key" {
 
 variable "network_name" {}
 
+variable "instance_type" {
+  default = "t2.medium"
+}
+
 locals {
   ssh_public_key = "${coalesce(var.ssh_public_key, join("", tls_private_key.ssh.*.public_key_openssh))}"
   quorum_dir     = "/quorum"
@@ -132,7 +136,7 @@ resource "aws_instance" "node" {
   count = "${var.number_of_nodes}"
 
   ami                         = "${data.aws_ami.ubuntu.id}"
-  instance_type               = "t2.medium"
+  instance_type               = "${var.instance_type}"
   associate_public_ip_address = true
   key_name                    = "${aws_key_pair.ssh.key_name}"
   subnet_id                   = "${element(data.aws_subnet_ids.node.ids, 0)}"

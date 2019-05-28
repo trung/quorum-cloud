@@ -24,11 +24,11 @@ module "bootstrap" {
   source          = "../../bootstrap"
   consensus       = "${var.consensus}"
   number_of_nodes = "${var.number_of_nodes}"
-  node_ips        = ["${module.node.private_ips}"]
+  node_ips        = ["${module.cluster.private_ips}"]
   output_dir      = "${path.module}/target"
 }
 
-module "node" {
+module "cluster" {
   source          = "./node"
   network_name    = "${var.name}"
   number_of_nodes = "${var.number_of_nodes}"
@@ -47,9 +47,9 @@ resource "null_resource" "publish" {
     type        = "ssh"
     agent       = false
     timeout     = "60s"
-    host        = "${element(module.node.ips, count.index)}"
+    host        = "${element(module.cluster.ips, count.index)}"
     user        = "ubuntu"
-    private_key = "${module.node.private_key}"
+    private_key = "${module.cluster.private_key}"
   }
 
   provisioner "remote-exec" {
@@ -58,7 +58,7 @@ resource "null_resource" "publish" {
 
   provisioner "file" {
     source      = "${element(module.bootstrap.data_dirs, count.index)}/"
-    destination = "${module.node.quorum_dir}"
+    destination = "${module.cluster.quorum_dir}"
   }
 
   provisioner "remote-exec" {
@@ -70,5 +70,5 @@ resource "null_resource" "publish" {
 }
 
 output "nodes" {
-  value = "${module.node.dns}"
+  value = "${module.cluster.dns}"
 }

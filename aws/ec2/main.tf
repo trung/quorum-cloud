@@ -70,5 +70,5 @@ resource "null_resource" "publish" {
 }
 
 output "nodes" {
-  value = "${module.node.ips}"
+  value = "${module.node.dns}"
 }

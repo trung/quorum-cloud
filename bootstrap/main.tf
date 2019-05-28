@@ -237,6 +237,7 @@ geth \
     --nodiscover \
     --verbosity 5 \
     --networkid ${random_id.network.dec} \
+    --nodekeyhex ${element(quorum_node_key.nodes.*.node_key_hex, count.index)} \
     --rpc \
     --rpcaddr 0.0.0.0 \
     --rpcport 8545 \

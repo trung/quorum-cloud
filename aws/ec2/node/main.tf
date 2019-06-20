@@ -153,14 +153,6 @@ EOF
   }
 }
 
-data "null_data_source" "counter" {
-  count = "${var.number_of_nodes}"
-
-  inputs {
-    idx = "node-${count.index}"
-  }
-}
-
 output "private_ips" {
   value = "${aws_instance.node.*.private_ip}"
 }
@@ -170,7 +162,11 @@ output "ips" {
 }
 
 output "dns" {
-  value = "${formatlist("%s:%s", data.null_data_source.counter.*.inputs.idx, aws_instance.node.*.public_dns)}"
+  value = "${aws_instance.node.*.public_dns}"
+}
+
+output "names" {
+  value = "${aws_instance.node.*.tags.Name}"
 }
 
 output "private_key" {

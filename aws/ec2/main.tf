@@ -86,7 +86,7 @@ resource "null_resource" "publish" {
 }
 
 output "nodes" {
-  value = "${module.cluster.dns}"
+  value = "${formatlist("%s:%s", module.cluster.names, module.cluster.dns)}"
 }
 
 output "ethstats" {

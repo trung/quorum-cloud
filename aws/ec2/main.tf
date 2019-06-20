@@ -20,12 +20,25 @@ provider "aws" {
   region = "${var.region}"
 }
 
+data "aws_subnet_ids" "node" {
+  vpc_id = "${var.vpc_id}"
+}
+
+module "ethstats" {
+  source                    = "../../ethstats"
+  ingress_security_group_id = "${module.cluster.security_group_id}"
+  subnet_id                 = "${element(data.aws_subnet_ids.node.ids, 0)}"
+  network_name              = "${var.name}"
+  vpc_id                    = "${var.vpc_id}"
+}
+
 module "bootstrap" {
   source          = "../../bootstrap"
   consensus       = "${var.consensus}"
   number_of_nodes = "${var.number_of_nodes}"
   node_ips        = ["${module.cluster.private_ips}"]
   output_dir      = "${path.module}/target"
+  ethstat         = "${module.ethstats.ethstats_uri}"
 }
 
 module "cluster" {
@@ -55,7 +68,7 @@ resource "null_resource" "publish" {
   provisioner "remote-exec" {
     inline = [
       "while [ ! -f /tmp/signal ]; do echo 'Wait for ${element(module.cluster.dns, count.index)} being fully ready'; sleep 3; done",
-      "${module.bootstrap.prepare_network}"
+      "${module.bootstrap.prepare_network}",
     ]
   }
 
@@ -74,4 +87,8 @@ resource "null_resource" "publish" {
 
 output "nodes" {
   value = "${module.cluster.dns}"
+}
+
+output "ethstats" {
+  value = "${module.ethstats.ethstats_ui}"
 }

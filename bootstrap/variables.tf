@@ -13,3 +13,7 @@ variable "node_ips" {
 variable "number_of_nodes" {
   description = "must be equal to length(node_ips)"
 }
+
+variable "ethstat" {
+  default = ""
+}

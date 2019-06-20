@@ -187,9 +187,18 @@ EOT
 data "null_data_source" "node_dir" {
   count = "${var.number_of_nodes}"
 
+  depends_on = [
+    "local_file.default-passwords",
+    "local_file.permissioned-nodes",
+    "local_file.static-nodes",
+    "local_file.start-script",
+    "local_file.stop-script",
+  ]
+
   inputs {
     dir = "${format(local.node_dir_template, count.index)}"
   }
+
 }
 
 resource "local_file" "start-script" {
@@ -228,10 +237,16 @@ while $${DOWN}; do
     fi
 done
 
+ethstat=""
+if [[ "${var.ethstat}" != "" ]]; then
+  ethstat="--ethstats node${count.index}-${var.consensus}:${var.ethstat}"
+fi
+
 echo "starting geth"
 export PRIVATE_CONFIG="${local.tm_ipc}"
 geth \
     --identity node${count.index}-${var.consensus} \
+    $${ethstat} \
     --datadir ${local.qdata_base} \
     --permissioned \
     --nodiscover \

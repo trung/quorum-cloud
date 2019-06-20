@@ -77,18 +77,6 @@ resource "aws_security_group" "quorum" {
   }
 
   ingress {
-    from_port = 0
-    to_port   = 0
-    protocol  = "-1"
-
-    cidr_blocks = [
-      "10.0.0.0/8",
-    ]
-
-    description = "From other VPC peering CIDR"
-  }
-
-  ingress {
     from_port = 22
     to_port   = 22
     protocol  = "tcp"
@@ -98,18 +86,6 @@ resource "aws_security_group" "quorum" {
     ]
 
     description = "SSH"
-  }
-
-  ingress {
-    from_port = 8
-    to_port   = 0
-    protocol  = "icmp"
-
-    cidr_blocks = [
-      "10.0.0.0/8",
-    ]
-
-    description = "Ping"
   }
 
   egress {
@@ -156,10 +132,10 @@ mkdir -p ${local.quorum_dir}/qdata
 mkdir -p ${local.quorum_dir}/bin
 
 cd ${local.quorum_dir}/bin
-wget "https://bintray.com/quorumengineering/quorum/download_file?file_path=v2.2.3%2Fgeth_v2.2.3_linux_amd64.tar.gz" -O geth.tar.gz
+wget "https://bintray.com/quorumengineering/quorum/download_file?file_path=v2.2.4%2Fgeth_v2.2.4_linux_amd64.tar.gz" -O geth.tar.gz
 tar xfvz geth.tar.gz
 rm geth.tar.gz
-wget "https://oss.sonatype.org/content/groups/public/com/jpmorgan/quorum/tessera-app/0.9/tessera-app-0.9-app.jar" -O tessera.jar
+wget "https://oss.sonatype.org/content/groups/public/com/jpmorgan/quorum/tessera-app/0.9.2/tessera-app-0.9.2-app.jar" -O tessera.jar
 java -jar tessera.jar -keygen -filename ${local.quorum_dir}/tm/tm < /dev/null
 cat <<F > .profile
 export PATH=$${PATH}:${local.quorum_dir}/bin
@@ -195,4 +171,8 @@ output "private_key" {
 
 output "quorum_dir" {
   value = "${local.quorum_dir}"
+}
+
+output "security_group_id" {
+  value = "${aws_security_group.quorum.id}"
 }

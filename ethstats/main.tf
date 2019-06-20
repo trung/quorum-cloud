@@ -60,7 +60,7 @@ resource "aws_instance" "ethstats" {
   instance_type = "t2.large"
 
   vpc_security_group_ids = [
-    "${aws_security_group.bastion-ethstats.id}",
+    "${aws_security_group.ethstats.id}",
   ]
 
   subnet_id                   = "${var.subnet_id}"
@@ -92,7 +92,7 @@ EOF
   }
 }
 
-resource "aws_security_group" "bastion-ethstats" {
+resource "aws_security_group" "ethstats" {
   name        = "ethstats-${var.network_name}"
   description = "Security group used by external to access ethstats for Quorum network ${var.network_name}"
   vpc_id      = "${var.vpc_id}"

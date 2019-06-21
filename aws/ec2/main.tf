@@ -83,6 +83,11 @@ resource "null_resource" "publish" {
       "sleep 3",                           // avoid connection shutting down before processes start up
     ]
   }
+
+  provisioner "local-exec" {
+    when    = "destroy"
+    command = "rm -rf ${path.module}/target/${count.index}"
+  }
 }
 
 output "nodes" {

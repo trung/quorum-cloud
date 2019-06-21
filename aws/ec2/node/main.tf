@@ -57,6 +57,11 @@ resource "local_file" "private_key" {
   count    = "${var.ssh_public_key == "" ? 1 : 0}"
   filename = "${var.output_dir}/${var.network_name}.pem"
   content  = "${tls_private_key.ssh.private_key_pem}"
+
+  provisioner "local-exec" {
+    on_failure = "continue"
+    command    = "chmod 600 ${self.filename}"
+  }
 }
 
 resource "aws_key_pair" "ssh" {

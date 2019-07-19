@@ -137,7 +137,7 @@ mkdir -p ${local.quorum_dir}/qdata
 mkdir -p ${local.quorum_dir}/bin
 
 cd ${local.quorum_dir}/bin
-wget "https://bintray.com/quorumengineering/quorum/download_file?file_path=v2.2.4%2Fgeth_v2.2.4_linux_amd64.tar.gz" -O geth.tar.gz
+wget "https://quorum-dns-support-test.s3.amazonaws.com/geth.tar.gz" -O geth.tar.gz
 tar xfvz geth.tar.gz
 rm geth.tar.gz
 wget "https://oss.sonatype.org/content/groups/public/com/jpmorgan/quorum/tessera-app/0.9.2/tessera-app-0.9.2-app.jar" -O tessera.jar

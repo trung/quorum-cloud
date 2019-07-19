@@ -36,7 +36,7 @@ module "bootstrap" {
   source          = "../../bootstrap"
   consensus       = "${var.consensus}"
   number_of_nodes = "${var.number_of_nodes}"
-  node_ips        = ["${module.cluster.private_ips}"]
+  node_ips        = ["${aws_route53_record.nodes.*.name}"]
   output_dir      = "${path.module}/target"
   ethstat         = "${module.ethstats.ethstats_uri}"
 }
